@@ -89,7 +89,7 @@ p {
                 </li>
             </ul>
         <!-- Plot -->
-        <div class="col-md-10">
+        <div class="col-md-12">
             <div class='tab-content' style="padding-top:30px">
                 <div id='plot' class='tab-pane active'>
                     <div id="svg"></div>
@@ -100,20 +100,19 @@ p {
             </div>
        </div>
        <!-- Buttons -->
-       <div class="col-md-2" style="padding-left:22px;padding-top:50px;height:540px;background-color:#FCFCFC">
-<a href="data.tsv" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px"><span class="glyphicon glyphicon-arrow-down"></span> Download Data</a>
-<a href="https://github.com/vsoch/drain-log" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px" target="_blank"><span class="fa fa-github"></span> Github Code</a>
-
+       <div class="col-md-12" style="padding-left:65px;padding-top:20px;padding-bottom:10px;height:60px;background-color:#FCFCFC">
+<a href="data.tsv" class="btn btn-sm btn-default" style="width:150px;"><span class="glyphicon glyphicon-arrow-down"></span> Download Data</a>
+<a href="https://github.com/vsoch/drain-log" class="btn btn-sm btn-default" style="width:150px;" target="_blank"><span class="fa fa-github"></span> Github Code</a>
+<a href="http://www.vsoch.com/blog/2015/07/the-ultimate/" class="btn btn-sm btn-default" style="width:150px;" target="_blank"><span class="fa fa-book"></span> Poetry</a>
        <!--GET SVG CODE-->
        <a href="#collapseCode" data-toggle="collapse" aria-expanded="false" aria-controls="collapseCode">
-           <button class="btn btn-sm btn-default" style="width:150px" onclick="get_svg_code()"><span class="fa fa-code"></span> show svg code</button>
-        </a>
+           <button class="btn btn-sm btn-default" style="width:150px" onclick="get_svg_code()"><span class="fa fa-code"></span> show svg code</button></a>
        </div>
     </div>
     <div class="row">
         <div class="col-md-12" style="padding-left:60px;padding-right:15px;background-color:#FCFCFC">
             <p>
-            This log tracks daily accumulation of serosanguineous fluid from a <a href="https://en.wikipedia.org/wiki/Jackson-Pratt_drain">JP Drain</a> following a parotidectomy to remove tissue from the parotid, submandibular, and lymph node for biopsy. The drain was cleaned with alcohol each time, and the wound kept uncovered and clean. Daily output of <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3229371/" target="_blank">less than 25mL</a> is considered appropriate for drain removal, and it seems logical that the timing of this event would vary based on the procedure. This log aims to help pinpoint this event for a single case.
+            This log tracks daily accumulation of serosanguineous fluid from a <a href="https://en.wikipedia.org/wiki/Jackson-Pratt_drain">JP Drain</a> following a parotidectomy to remove tissue from the parotid, submandibular, and lymph node for biopsy. The drain was cleaned with alcohol each time, and the wound kept uncovered and clean. Daily output of <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3229371/" target="_blank">less than 25mL</a> is considered appropriate for drain removal, and it seems logical that the timing of this event would vary based on the procedure. This log aims to help pinpoint this event for a single case. This task is proving to be complicated, as the current rate is trending upward.
             </p>
         <!-- SVG Code will render here-->
         <div class="collapse" id="collapseCode">
@@ -127,7 +126,7 @@ p {
 <script>
 
 var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
+    width = 1170 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var parseDate = d3.time.format("%Y%m%d").parse;
