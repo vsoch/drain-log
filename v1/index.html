@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<!--Font Awesome icons-->
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+
+<!-- DataTables-->
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+<link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css"/>
+
+<style>
+
+body h1 {
+  font-family: 'Roboto', sans-serif;
+}
+
+body {
+  font: 10px sans-serif;
+}
+
+p {
+  font: 14px sans-serif;
+  margin-top:40px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.area.above {
+  fill: rgb(252,141,89);
+}
+
+.area.below {
+  fill: rgb(145,207,96);
+}
+
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+  z-index:10
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+  z-index:10
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+</style>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<div class="container">
+    <h1>JP-Drain Log</h1>
+    <div class="row">
+            <ul id='navigation-tabs' class='nav nav-tabs'>
+                <li>
+                    <a data-toggle='tab' href='#plot'>Plot</a>
+                </li>
+                <li>
+                    <a data-toggle='tab' href='#table'>Table</a>
+                </li>
+            </ul>
+        <!-- Plot -->
+        <div class="col-md-10">
+            <div class='tab-content' style="padding-top:30px">
+                <div id='plot' class='tab-pane active'>
+                    <div id="svg"></div>
+                </div>
+                <div id='table' class='tab-pane' style="padding-top:30px">
+                    <table id="tabley" class="table table-striped table-bordered" cellspacing="0" width="100%"></table>
+                </div>
+            </div>
+       </div>
+       <!-- Buttons -->
+       <div class="col-md-2" style="padding-left:22px;padding-top:50px;height:540px;background-color:#FCFCFC">
+<a href="data.tsv" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px"><span class="glyphicon glyphicon-arrow-down"></span> Download Data</a>
+<a href="https://github.com/vsoch/drain-log" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px" target="_blank"><span class="fa fa-github"></span> Github Code</a>
+
+       <!--GET SVG CODE-->
+       <a href="#collapseCode" data-toggle="collapse" aria-expanded="false" aria-controls="collapseCode">
+           <button class="btn btn-sm btn-default" style="width:150px" onclick="get_svg_code()"><span class="fa fa-code"></span> show svg code</button>
+        </a>
+       </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="padding-left:60px;padding-right:15px;background-color:#FCFCFC">
+            <p>
+            This log tracks daily accumulation of serosanguineous fluid from a <a href="https://en.wikipedia.org/wiki/Jackson-Pratt_drain">JP Drain</a> following a parotidectomy to remove tissue from the parotid, submandibular, and lymph node for biopsy. The drain was cleaned with alcohol each time, and the wound kept uncovered and clean. Daily output of <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3229371/" target="_blank">less than 25mL</a> is considered appropriate for drain removal, and it seems logical that the timing of this event would vary based on the procedure. This log aims to help pinpoint this event for a single case.
+            </p>
+        <!-- SVG Code will render here-->
+        <div class="collapse" id="collapseCode">
+            <div class="well" style="background:white; font-size:12px;word-wrap:break-word" id="codearea">
+            </div>
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+<script>
+
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var parseDate = d3.time.format("%Y%m%d").parse;
+
+var x = d3.time.scale()
+    .range([0, width]);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+
+var line = d3.svg.area()
+    .interpolate("basis")
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d["actual"]); });
+
+var area = d3.svg.area()
+    .interpolate("basis")
+    .x(function(d) { return x(d.date); })
+    .y1(function(d) { return y(d["actual"]); });
+
+var bisectDate = d3.bisector(function(d) { return d.date; }).left
+
+var svg = d3.select("#svg").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+d3.tsv("data.tsv", function(error, data) {
+  if (error) throw error;
+
+  data.forEach(function(d) {
+    d.date = parseDate(d.date);
+    d["actual"]= +d["actual"];
+    d["goal"] = +d["goal"];
+    d.note = d.notes
+  });
+
+  x.domain(d3.extent(data, function(d) { return d.date; }));
+
+  y.domain([
+    d3.min(data, function(d) { return Math.min(d["actual"], d["goal"]); }),
+    d3.max(data, function(d) { return Math.max(d["actual"], d["goal"]); })
+  ]);
+
+  svg.datum(data);
+
+  svg.append("clipPath")
+      .attr("id", "clip-below")
+    .append("path")
+      .attr("d", area.y0(height));
+
+  svg.append("clipPath")
+      .attr("id", "clip-above")
+    .append("path")
+      .attr("d", area.y0(0));
+
+  svg.append("path")
+      .attr("class", "area above")
+      .attr("clip-path", "url(#clip-above)")
+      .attr("d", area.y0(function(d) { return y(d["goal"]); }));
+
+  svg.append("path")
+      .attr("class", "area below")
+      .attr("clip-path", "url(#clip-below)")
+      .attr("d", area);
+
+  svg.append("path")
+      .attr("class", "line")
+      .attr("d", line);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Total Drainage (mL)");
+
+var focus = svg.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+
+  focus.append("circle")
+      .attr("r", 10);
+
+  focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em");
+
+  svg.append("rect")
+      .attr("class", "overlay")
+      .attr("width", width)
+      .attr("height", height)
+      .on("mouseover", function() { focus.style("display", null); })
+      .on("mouseout", function() { focus.style("display", "none"); })
+      .on("mousemove", mousemove);
+
+  function mousemove() {
+    var x0 = x.invert(d3.mouse(this)[0]),
+        i = bisectDate(data, x0, 1),
+        d0 = data[i - 1],
+        d1 = data[i],
+        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.goal-10) + ")");
+    focus.select("text").text(d.note);
+  }
+
+
+   });
+
+// Function to get svg code
+function get_svg_code() {
+
+      // Fill in the code area with the SVG code
+      var codearea = document.getElementById('codearea');
+      var code = document.getElementById("svg")
+      codearea.textContent = code.innerHTML;
+}
+
+// Create data table
+$(document).ready(function() {
+    $.get('data.tsv', function(data) {
+        //split on new lines
+        var lines = data.split('\n');
+        var tabledata = []
+        //iterate over lines and split data
+        for(var i=1;i<lines.length;i++) {
+            tabledata.push(lines[i].split('\t'));
+        }
+    tabledata.pop(lines.length)
+
+    $('#tabley').dataTable( {
+        "data": tabledata,
+        "columns": [
+            { "title": "Date" },
+            { "title": "Goal (mL)" },
+            { "title": "Actual (mL)" },
+            { "title": "Notes"}
+        ]
+      });   
+   });
+});
+</script>
