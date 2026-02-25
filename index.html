@@ -1,5 +1,10 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
+<!-- Crucial tag for mobile scaling -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Jackson Pratt (JP) Drain Log</title>
 
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -8,275 +13,458 @@
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
-<!--Font Awesome icons-->
+<!--Font Awesome & Fonts-->
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700' rel='stylesheet' type='text/css'>
 
 <!-- DataTables-->
-<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
 <script src="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.js"></script>
 <link rel="stylesheet" href="//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css"/>
 
 <style>
-
-body h1 {
-  font-family: 'Roboto', sans-serif;
-}
-
+/* --- Global & Typography --- */
 body {
-  font: 10px sans-serif;
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f7f6;
+  color: #333;
+  padding-bottom: 50px;
 }
 
-p {
-  font: 14px sans-serif;
-  margin-top:40px;
+.main-container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+  margin-top: 40px;
+  width: 95%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+h1.page-title {
+  font-weight: 700;
+  color: #2c3e50;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
 }
 
-.x.axis path {
-  display: none;
+select#surgery-select {
+  font-weight: 500;
+  color: #34495e;
+  border: 2px solid #ecf0f1;
+  border-radius: 6px;
+  height: 45px;
+  box-shadow: none;
+  background-color: #fafbfc;
+  margin-left: 20px;
+  width: auto;
+  min-width: 250px;
 }
 
-.area.above {
-  fill: rgb(252,141,89);
+/* --- Navigation Tabs --- */
+.nav-tabs {
+  border-bottom: 2px solid #ecf0f1;
+}
+.nav-tabs > li > a {
+  font-size: 16px;
+  color: #7f8c8d;
+  font-weight: 500;
+  border: none;
+  border-radius: 0;
+  padding: 12px 20px;
+}
+.nav-tabs > li > a:hover {
+  background-color: transparent;
+  color: #3498db;
+}
+.nav-tabs > li.active > a, 
+.nav-tabs > li.active > a:focus, 
+.nav-tabs > li.active > a:hover {
+  border: none;
+  border-bottom: 3px solid #3498db;
+  color: #3498db;
+  background-color: transparent;
 }
 
-.area.below {
-  fill: rgb(145,207,96);
+/* --- Buttons --- */
+.btn-custom {
+  background-color: #ecf0f1;
+  color: #2c3e50;
+  border: none;
+  font-weight: 600;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+  text-align: left;
+}
+.btn-custom:hover {
+  background-color: #dfe6e9;
+  color: #2c3e50;
+  transform: translateY(-1px);
+}
+.btn-custom i, .btn-custom span {
+  width: 20px;
+  text-align: center;
+  margin-right: 5px;
 }
 
-.line {
-  fill: none;
-  stroke: #000;
-  stroke-width: 1.5px;
+/* --- D3 Chart Styles --- */
+.svg-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  padding-bottom: 50%; /* aspect ratio */
+  vertical-align: top;
+  overflow: hidden;
+}
+.svg-content-responsive {
+  display: inline-block;
+  position: absolute;
+  top: 10px;
+  left: 0;
 }
 
-.overlay {
-  fill: none;
-  pointer-events: all;
-  z-index:10
+.axis path { display: none; }
+.axis line { fill: none; stroke: #d1d8e0; shape-rendering: crispEdges; }
+.axis text { fill: #7f8c8d; font-size: 13px; }
+.grid-line { stroke: #ecf0f1; stroke-dasharray: 4, 4; }
+.area.below { fill: #2ecc71; opacity: 0.15; }
+.line { fill: none; stroke: #27ae60; stroke-width: 3.5px; }
+.goal-line { fill: none; stroke: #e74c3c; stroke-width: 2px; stroke-dasharray: 6, 6; }
+.overlay { fill: none; pointer-events: all; z-index: 10; }
+.focus circle { fill: #fff; stroke: #2980b9; stroke-width: 3px; }
+.focus text { font-size: 14px; font-weight: 600; fill: #2c3e50; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff; }
+
+/* --- Misc Text --- */
+.description-text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #fdfdfd;
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
 }
 
-.overlay {
-  fill: none;
-  pointer-events: all;
-  z-index:10
-}
+/* =========================================
+   MOBILE RESPONSIVENESS OVERRIDES 
+   ========================================= */
+@media (max-width: 768px) {
+  .main-container {
+    padding: 15px;
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  h1.page-title {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 26px;
+  }
 
-.focus circle {
-  fill: none;
-  stroke: steelblue;
+  select#surgery-select {
+    margin-left: 0;
+    margin-top: 15px;
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .svg-container {
+    padding-bottom: 70%; /* Give the chart a taller aspect ratio on phones so it's easier to read */
+  }
+
+  .nav-tabs > li > a {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .btn-custom {
+    text-align: center; 
+  }
+
+  .sidebar-buttons {
+    padding-top: 20px !important;
+  }
 }
 </style>
+</head>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<div class="container">
-    <h1>JP-Drain Log</h1>
+
+<div class="main-container">
+    <h1 class="page-title">
+        Jackson-Pratt (JP) Drain Log
+        <!-- Dynamic Surgery Dropdown -->
+        <select id="surgery-select" class="form-control">
+            <option value="left-parotid-2026" selected>Left Parotid (Feb 2026)</option>
+            <option value="left-parotid-2015">Left Parotid (Jun 2015)</option>
+        </select>
+    </h1>
+
     <div class="row">
-            <ul id='navigation-tabs' class='nav nav-tabs'>
-                <li>
-                    <a data-toggle='tab' href='#plot'>Plot</a>
-                </li>
-                <li>
-                    <a data-toggle='tab' href='#table'>Table</a>
-                </li>
-            </ul>
-        <!-- Plot -->
+        <!-- Main Content Area -->
         <div class="col-md-10">
-            <div class='tab-content' style="padding-top:30px">
+            <ul id='navigation-tabs' class='nav nav-tabs'>
+                <li class="active"><a data-toggle='tab' href='#plot'>Plot</a></li>
+                <li><a data-toggle='tab' href='#table'>Table</a></li>
+            </ul>
+
+            <div class='tab-content' style="padding-top:20px">
                 <div id='plot' class='tab-pane active'>
-                    <div id="svg"></div>
+                    <div id="svg" class="svg-container"></div>
                 </div>
-                <div id='table' class='tab-pane' style="padding-top:30px">
-                    <table id="tabley" class="table table-striped table-bordered" cellspacing="0" width="100%"></table>
+                <div id='table' class='tab-pane' style="padding-top:20px">
+                    <!-- Added table-responsive wrapper for mobile side-scrolling -->
+                    <div class="table-responsive">
+                        <table id="tabley" class="table table-striped table-bordered" cellspacing="0" width="100%"></table>
+                    </div>
                 </div>
             </div>
        </div>
-       <!-- Buttons -->
-       <div class="col-md-2" style="padding-left:22px;padding-top:50px;height:540px;background-color:#FCFCFC">
-<a href="data.tsv" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px"><span class="glyphicon glyphicon-arrow-down"></span> Download Data</a>
-<a href="https://github.com/vsoch/drain-log" class="btn btn-sm btn-default" style="width:150px; margin-bottom:10px" target="_blank"><span class="fa fa-github"></span> Github Code</a>
 
-       <!--GET SVG CODE-->
-       <a href="#collapseCode" data-toggle="collapse" aria-expanded="false" aria-controls="collapseCode">
-           <button class="btn btn-sm btn-default" style="width:150px" onclick="get_svg_code()"><span class="fa fa-code"></span> show svg code</button>
-        </a>
+       <!-- Sidebar Buttons -->
+       <div class="col-md-2 sidebar-buttons" style="padding-top: 65px;">
+           <a href="data.tsv" class="btn btn-block btn-custom" style="margin-bottom:15px">
+               <span class="glyphicon glyphicon-download-alt"></span> Data (.tsv)
+           </a>
+           <a href="https://github.com/vsoch/drain-log" class="btn btn-block btn-custom" style="margin-bottom:15px" target="_blank">
+               <span class="fa fa-github" style="font-size: 1.2em;"></span> GitHub Code
+           </a>
+           <a href="#collapseCode" data-toggle="collapse" class="btn btn-block btn-custom" aria-expanded="false" aria-controls="collapseCode" onclick="get_svg_code()">
+               <span class="fa fa-code"></span> Show SVG Code
+           </a>
        </div>
     </div>
+
+    <!-- Description & Code Output -->
     <div class="row">
-        <div class="col-md-12" style="padding-left:60px;padding-right:15px;background-color:#FCFCFC">
-            <p>
-            This log tracks daily accumulation of serosanguineous fluid from a <a href="https://en.wikipedia.org/wiki/Jackson-Pratt_drain">JP Drain</a> following a parotidectomy to remove tissue from the parotid, submandibular, and lymph node for biopsy. The drain was cleaned with alcohol each time, and the wound kept uncovered and clean. Daily output of <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3229371/" target="_blank">less than 25mL</a> is considered appropriate for drain removal, and it seems logical that the timing of this event would vary based on the procedure. This log aims to help pinpoint this event for a single case.
+        <div class="col-md-12">
+            <p class="description-text">
+                <span style="font-style:italic">💫 Captain's log... parotid date... no, let's not do that</span> This log tracks daily accumulation of serosanguineous fluid from a <a href="https://en.wikipedia.org/wiki/Jackson-Pratt_drain">Jackson-Pratt (JP) Drain</a> following a parotidectomy to remove tissue from the parotid, submandibular, and lymph node for biopsy. It includes data for the left parotid for surgeries in 2015 and 2026. Data for the right (2016) surgery was not kept. The drain was cleaned with alcohol each time, and the wound kept uncovered and clean. Daily output of <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3229371/" target="_blank">less than 25mL</a> is considered appropriate for drain removal, and it seems logical that the timing of this event would vary based on the procedure. This log aims to help pinpoint this event. Interestingly, the trend of increased followed by decreased drainage is consistent between surgeries, however the second surgery has overall decreased total output by a scale of about 2x.
             </p>
-        <!-- SVG Code will render here-->
-        <div class="collapse" id="collapseCode">
-            <div class="well" style="background:white; font-size:12px;word-wrap:break-word" id="codearea">
+            
+            <div class="collapse" id="collapseCode">
+                <div class="well" style="background:#f8f9fa; border: 1px solid #d1d8e0; font-family: monospace; font-size:12px; word-wrap:break-word;" id="codearea">
+                </div>
             </div>
-        </div>
-        </div>
         </div>
     </div>
 </div>
-<script>
 
-var margin = {top: 20, right: 20, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+<script>
+var margin = {top: 30, right: 40, bottom: 40, left: 60},
+    width = 1100 - margin.left - margin.right,
+    height = 550 - margin.top - margin.bottom;
 
 var parseDate = d3.time.format("%Y%m%d").parse;
 
-var x = d3.time.scale()
-    .range([0, width]);
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(8);
+var yAxis = d3.svg.axis().scale(y).orient("left").ticks(8);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+var globalData = [];
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-
-var line = d3.svg.area()
-    .interpolate("basis")
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d["actual"]); });
-
-var area = d3.svg.area()
-    .interpolate("basis")
-    .x(function(d) { return x(d.date); })
-    .y1(function(d) { return y(d["actual"]); });
-
-var bisectDate = d3.bisector(function(d) { return d.date; }).left
-
-var svg = d3.select("#svg").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
+// Data Fetch & Parse
 d3.tsv("data.tsv", function(error, data) {
   if (error) throw error;
 
   data.forEach(function(d) {
+    d.rawDate = d.date; 
     d.date = parseDate(d.date);
-    d["actual"]= +d["actual"];
+    d["actual"] = +d["actual"];
     d["goal"] = +d["goal"];
-    d.note = d.notes
+    d.note = d.notes;
   });
 
+  globalData = data;
+
+  drawPlot("left-parotid-2026");
+  drawTable("left-parotid-2026");
+});
+
+function make_y_axis() {
+  return d3.svg.axis().scale(y).orient("left").ticks(8);
+}
+
+function drawPlot(surgeryId) {
+  var data = globalData.filter(function(d) { return d.surgery === surgeryId; });
+
+  d3.select("#svg").selectAll("*").remove();
+
+  var svg = d3.select("#svg")
+      .append("svg")
+      .attr("viewBox", "0 0 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
+      .attr("preserveAspectRatio", "xMinYMin meet")
+      .classed("svg-content-responsive", true)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
   x.domain(d3.extent(data, function(d) { return d.date; }));
+  y.domain([0, d3.max(data, function(d) { return Math.max(d["actual"], d["goal"]) * 1.1; })]);
 
-  y.domain([
-    d3.min(data, function(d) { return Math.min(d["actual"], d["goal"]); }),
-    d3.max(data, function(d) { return Math.max(d["actual"], d["goal"]); })
-  ]);
+  // Add Gridlines
+  svg.append("g")
+      .attr("class", "grid")
+      .call(make_y_axis()
+          .tickSize(-width, 0, 0)
+          .tickFormat("")
+      )
+      .selectAll("line")
+      .attr("class", "grid-line");
 
-  svg.datum(data);
+  // Interpolation set to "monotone" to hit every data point exactly
+  var area = d3.svg.area()
+      .interpolate("monotone") 
+      .x(function(d) { return x(d.date); })
+      .y0(height)
+      .y1(function(d) { return y(d["actual"]); });
 
-  svg.append("clipPath")
-      .attr("id", "clip-below")
-    .append("path")
-      .attr("d", area.y0(height));
+  var line = d3.svg.line()
+      .interpolate("monotone") 
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d["actual"]); });
 
-  svg.append("clipPath")
-      .attr("id", "clip-above")
-    .append("path")
-      .attr("d", area.y0(0));
+  var goalLine = d3.svg.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d["goal"]); });
 
-  svg.append("path")
-      .attr("class", "area above")
-      .attr("clip-path", "url(#clip-above)")
-      .attr("d", area.y0(function(d) { return y(d["goal"]); }));
+  // Area
+  svg.append("path").datum(data).attr("class", "area below").attr("d", area);
 
-  svg.append("path")
-      .attr("class", "area below")
-      .attr("clip-path", "url(#clip-below)")
-      .attr("d", area);
+  // Line
+  svg.append("path").datum(data).attr("class", "line").attr("d", line);
 
-  svg.append("path")
-      .attr("class", "line")
-      .attr("d", line);
+  // Goal Line
+  svg.append("path").datum(data).attr("class", "goal-line").attr("d", goalLine);
 
+  // --- LEGEND ---
+  var legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", "translate(" + (width - 200) + ", 20)");
+
+  // Actual Drainage Legend Item
+  legend.append("line")
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", 30)
+      .attr("y2", 0)
+      .attr("class", "line");
+  legend.append("text")
+      .attr("x", 40)
+      .attr("y", 0)
+      .attr("dy", ".35em")
+      .style("font-size", "14px")
+      .style("font-weight", "500")
+      .style("fill", "#34495e")
+      .text("Actual Drainage");
+
+  // Goal Legend Item
+  legend.append("line")
+      .attr("x1", 0)
+      .attr("y1", 25)
+      .attr("x2", 30)
+      .attr("y2", 25)
+      .attr("class", "goal-line");
+  legend.append("text")
+      .attr("x", 40)
+      .attr("y", 25)
+      .attr("dy", ".35em")
+      .style("font-size", "14px")
+      .style("font-weight", "500")
+      .style("fill", "#34495e")
+      .text("Removal Goal (< 25 mL)");
+
+  // X Axis
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(xAxis);
 
+  // Y Axis
   svg.append("g")
       .attr("class", "y axis")
       .call(yAxis)
     .append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("y", -45)
+      .attr("x", -(height/2))
       .attr("dy", ".71em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "middle")
+      .style("font-size", "14px")
+      .style("font-weight", "500")
+      .style("fill", "#34495e")
       .text("Total Drainage (mL)");
 
-var focus = svg.append("g")
+  // Tooltip Setup
+  var focus = svg.append("g")
       .attr("class", "focus")
       .style("display", "none");
 
-  focus.append("circle")
-      .attr("r", 10);
+  focus.append("circle").attr("r", 6);
+  focus.append("text").attr("x", 12).attr("dy", "0.3em");
 
-  focus.append("text")
-      .attr("x", 9)
-      .attr("dy", ".35em");
+  var bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
+  // Added "touchstart" and "touchmove" listeners for mobile swiping
   svg.append("rect")
       .attr("class", "overlay")
       .attr("width", width)
       .attr("height", height)
       .on("mouseover", function() { focus.style("display", null); })
       .on("mouseout", function() { focus.style("display", "none"); })
-      .on("mousemove", mousemove);
+      .on("mousemove", mousemove)
+      .on("touchstart", function() { focus.style("display", null); d3.event.preventDefault(); })
+      .on("touchmove", function() { mousemove.call(this); d3.event.preventDefault(); });
 
   function mousemove() {
-    var x0 = x.invert(d3.mouse(this)[0]),
-        i = bisectDate(data, x0, 1),
-        d0 = data[i - 1],
+    // Determine coordinate based on touch vs mouse event
+    var xPosition;
+    if (d3.event.touches) {
+        var touch = d3.event.touches[0];
+        var svgBounds = this.getBoundingClientRect();
+        var scale = width / svgBounds.width; 
+        xPosition = (touch.clientX - svgBounds.left - margin.left) * scale;
+    } else {
+        xPosition = d3.mouse(this)[0];
+    }
+
+    var x0 = x.invert(xPosition),
+        i = bisectDate(data, x0, 1);
+        
+    if (i === 0) i = 1;
+    if (i >= data.length) i = data.length - 1;
+
+    var d0 = data[i - 1],
         d1 = data[i],
         d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.goal-10) + ")");
-    focus.select("text").text(d.note);
+    
+    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.actual) + ")");
+    
+    var noteStr = d.note && d.note !== "none" ? " | " + d.note : "";
+    focus.select("text").text(d.actual + " mL" + noteStr);
   }
-
-
-   });
-
-// Function to get svg code
-function get_svg_code() {
-
-      // Fill in the code area with the SVG code
-      var codearea = document.getElementById('codearea');
-      var code = document.getElementById("svg")
-      codearea.textContent = code.innerHTML;
 }
 
-// Create data table
-$(document).ready(function() {
-    $.get('data.tsv', function(data) {
-        //split on new lines
-        var lines = data.split('\n');
-        var tabledata = []
-        //iterate over lines and split data
-        for(var i=1;i<lines.length;i++) {
-            tabledata.push(lines[i].split('\t'));
-        }
-    tabledata.pop(lines.length)
+function drawTable(surgeryId) {
+    var filteredData = globalData.filter(function(d) { return d.surgery === surgeryId; });
+    var tabledata = filteredData.map(function(d) {
+        var displayDate = d.rawDate.substring(0,4) + "-" + d.rawDate.substring(4,6) + "-" + d.rawDate.substring(6,8);
+        return [displayDate, d.goal, d.actual, d.note];
+    });
 
-    $('#tabley').dataTable( {
+    if ($.fn.DataTable.isDataTable('#tabley')) {
+        $('#tabley').DataTable().destroy();
+    }
+
+    $('#tabley').dataTable({
         "data": tabledata,
         "columns": [
             { "title": "Date" },
@@ -284,7 +472,25 @@ $(document).ready(function() {
             { "title": "Actual (mL)" },
             { "title": "Notes"}
         ]
-      });   
-   });
+    });
+}
+
+$(document).ready(function() {
+    $('#surgery-select').on('change', function() {
+        var selected = $(this).val();
+        drawPlot(selected);
+        drawTable(selected);
+    });
 });
+
+function get_svg_code() {
+    var codearea = document.getElementById('codearea');
+    var svgNode = document.querySelector("#svg svg");
+    
+    if (svgNode) {
+        codearea.textContent = svgNode.outerHTML;
+    }
+}
 </script>
+</body>
+</html>
